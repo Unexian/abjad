@@ -378,7 +378,7 @@ def abjad(code: str, *, inp: list = None, var: dict = None):
 
         elif line[0] == "import":
             with open(line[1] + ".abjad", "r") as code:
-                var |= abjad(code.read(), line[2:], var)[1]
+                var |= abjad(code.read(), inp=line[2:], var=var)[1]
             continue
         
         for ind, lex in enumerate(line):
