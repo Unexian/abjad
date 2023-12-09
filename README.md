@@ -9,7 +9,7 @@ All functions in Abjad work on the primary "left" stack, except for builtin stac
 ## The basics of [Tacit](https://en.wikipedia.org/wiki/Tacit_programming)
 Tacit programming is the practise of not naming your variables.
 There are 3 kinds of programming languages: languages that don't let you tacit, languages that let you tacit, and languages that force you to tacit.
-Abjad is mostly the third type, and it is completely for functions.
+Abjad is mostly the third type.
 However, if stack manipulation is too annoying for you, the `asgn` function will let you store variables.
 Apparently, writing tacit code also makes your code more readable.
 
@@ -22,6 +22,8 @@ Apparently, writing tacit code also makes your code more readable.
     - Function that calls itself.
 - What is even the point of this language
     - Admittedly, that is one of the flaws of my argument
+- How do I break out of a loop?
+    - Put the recursion call in an `if`
 
 ## Function library
 ### Mathematical functions
