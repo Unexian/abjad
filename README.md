@@ -18,8 +18,6 @@ Apparently, writing tacit code also makes your code more readable.
     - Because I haven't implemented any others yet
 - Why can I not have multiline functions
     - Because I can't be bothered to try and do that
-- This language isn't turing complete yet
-    - I'm working on that, lexing is hard
 - How do I make a loop?
     - Function that calls itself.
 - What is even the point of this language
@@ -76,6 +74,7 @@ Apparently, writing tacit code also makes your code more readable.
 - `cout`: print the character with the ascii codepoint of the top stack value
 - `nop`: do nothing
 - `comm`: denote the rest of the line as a comment
+- `if`: execute the proceeding instruction if and only if the top stack value is (1.0+0.0j)
 
 ### Prefix functions
 Prefix functions must only come at the start of a line

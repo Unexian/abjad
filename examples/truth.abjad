@@ -1,0 +1,2 @@
+def ploop ploop out dup
+out if ploop neq 0 dup inp

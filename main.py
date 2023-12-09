@@ -33,6 +33,322 @@ def parse_complex(num):
     except ValueError:
         return False
 
+def abjadInstr(inst, st1, st2, var):
+    # lexed instructions
+    if inst[0] == "if":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        if st1.pop(0) == 1:
+            return abjadInstr(inst[1], st1, st2, var)
+    
+    # literals
+    elif parse_complex(inst) is not False:
+        st1 = [parse_complex(inst)] + st1
+
+    # consts
+    elif inst == "e":
+        st1 = [math.e + 0j] + st1
+
+    elif inst == "j":
+        st1 = [1j] + st1
+
+    elif inst == "pi":
+        st1 = [math.pi + 0j] + st1
+
+    elif inst == "tau":
+        st1 = [2 * math.pi + 0j] + st1
+
+    elif inst == "eta":
+        st1 = [math.pi / 2 + 0j] + st1
+
+    elif inst == "inf":
+        st1 = [math.inf + 0j] + st1
+
+    elif inst == "eps":
+        st1 = [sys.float_info.epsilon + 1 + 0j] + st1
+
+    elif inst == "mu":
+        st1 = [sys.float_info.min + 0j] + st1
+
+    elif inst == "omg":
+        st1 = [sys.float_info.max + 0j] + st1
+
+    elif inst == "rand":
+        st1 = [random.uniform(0, 1) + 0j] + st1
+
+    # math
+    elif inst == "add":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, a + b)
+
+    elif inst == "neg":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = -st1[0]
+
+    elif inst == "sub":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, a - b)
+
+    elif inst == "mul":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, a * b)
+
+    elif inst == "rcp":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        n = st1.pop(0)
+        if n == 0:
+            st1.insert(0, math.inf)
+        else:
+            st1.insert(0, 1/n)
+
+    elif inst == "div":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        if a == b:
+            st1.insert(0, 1)
+        elif a == 0:
+            st1.insert(0, math.inf * abs(b)/b)
+        else:
+            st1.insert(0, a/b)
+
+    elif inst == "mod":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        if b == 0:
+            st1.insert(0, 0)
+        else:
+            st1.insert(0, a % b)
+
+    elif inst == "abs":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = abs(st1[0])
+
+    elif inst == "sgn":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        n = st1.pop(0)
+        if n == 0:
+            st1.insert(0, 0)
+        else:
+            st1.insert(0, abs(n)/n)
+
+    elif inst == "pow":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, a ** b)
+
+    elif inst == "sqrt":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = st1[0] ** .5
+
+    elif inst == "log":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, math.log(a, b))
+
+    elif inst == "sin":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.sin(st1[0])
+
+    elif inst == "cos":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.cos(st1[0])
+
+    elif inst == "tan":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.tan(st1[0])
+
+    elif inst == "asin":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.asin(st1[0])
+
+    elif inst == "acos":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.acos(st1[0])
+
+    elif inst == "atan":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.atan(st1[0])
+
+    elif inst == "flr":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.floor(st1[0])
+
+    elif inst == "ceil":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.ceil(st1[0])
+
+    elif inst == "rnd":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1[0] = math.round(st1[0])
+
+    # equality
+    elif inst == "eq":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, float(a == b))
+
+    elif inst == "neq":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, float(a != b))
+
+    elif inst == "lt":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, float(a < b))
+
+    elif inst == "gt":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, float(a > b))
+
+    elif inst == "lte":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, float(a <= b))
+
+    elif inst == "gte":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, float(a >= b))
+
+    elif inst == "min":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, min(a, b))
+
+    elif inst == "max":
+        if len(st1) < 2:
+            raise AbjadArgumentException(len(st1), 2)
+        a = st1.pop(0)
+        b = st1.pop(0)
+        st1.insert(0, max(a, b))
+
+    # stack
+    elif inst == "dup":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1.insert(0, st1[0])
+
+    elif inst == "pop":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        st1.pop(0)
+
+    elif inst == "swp":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        if len(st2) < 1:
+            raise AbjadArgumentException(len(st2), 1)
+        n1 = st1.pop(0)
+        n2 = st2.pop(0)
+        st1.insert(0, n2)
+        st1.insert(0, n1)
+
+    elif inst == "lft":
+        if len(st2) < 1:
+            raise AbjadArgumentException(len(st2), 1)
+        n2 = st1.pop(0)
+        st1.insert(0, n2)
+
+    elif inst == "rgt":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        n1 = st1.pop(0)
+        st1.insert(0, n1)
+
+    # other
+    elif inst == "asrt":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        elif st1[0] != 1:
+            raise AbjadAssertException(st1[0])
+        else:
+            st1 = st1[1::]
+
+    elif inst == "dbg":
+        print((st1, st2))
+
+    elif inst == "inp":
+        inputted = parse_complex(input())
+        if inputted is False:
+            raise AbjadValueException(inputted)
+        else:
+            st1.insert(0, inputted)
+
+    elif inst == "out":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        print(st1.pop(0))
+
+    elif inst == "cout":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        if st1[0].imag != 0 or st1[0].real < 0 or st1[0].real % 1 != 0:
+            raise AbjadValueException(st1[0])
+        print(chr(round(st1.pop(0).real)), end="")
+
+    elif inst == "nop":
+        pass
+
+    elif inst in var:
+        if isinstance(var[inst], float):
+            st1.insert(0, var[inst])
+        elif isinstance(var[inst], str):
+            st1 = abjad(var[inst], inp=st1, var=var)[0]
+
+    else:
+        raise AbjadTermException(inst)
+    
+    return (st1, st2, var)
+
+
+
 
 def abjad(code: str, *, inp: list = None, var: dict = None):
 
@@ -58,315 +374,17 @@ def abjad(code: str, *, inp: list = None, var: dict = None):
             with open(line[1] + ".abjad", "r") as code:
                 var |= abjad(code.read(), line[2:], var)[1]
             continue
+        
+        for ind, lex in enumerate(line):
+            if lex == "if":
+                line = line[:ind:] + [("if", line[ind+1])] + line[ind+2::]
 
         line = line[::-1]
         for term in line:
-            # literals
-            if parse_complex(term) is not False:
-                stack1 = [parse_complex(term)] + stack1
-
-            # consts
-            elif term == "e":
-                stack1 = [math.e + 0j] + stack1
-
-            elif term == "j":
-                stack1 = [1j] + stack1
-
-            elif term == "pi":
-                stack1 = [math.pi + 0j] + stack1
-
-            elif term == "tau":
-                stack1 = [2 * math.pi + 0j] + stack1
-
-            elif term == "eta":
-                stack1 = [math.pi / 2 + 0j] + stack1
-
-            elif term == "inf":
-                stack1 = [math.inf + 0j] + stack1
-
-            elif term == "eps":
-                stack1 = [sys.float_info.epsilon + 1 + 0j] + stack1
-
-            elif term == "mu":
-                stack1 = [sys.float_info.min + 0j] + stack1
-
-            elif term == "omg":
-                stack1 = [sys.float_info.max + 0j] + stack1
-
-            elif term == "rand":
-                stack1 = [random.uniform(0, 1) + 0j] + stack1
-
-            # math
-            elif term == "add":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, a + b)
-
-            elif term == "neg":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = -stack1[0]
-
-            elif term == "sub":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, a - b)
-
-            elif term == "mul":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, a * b)
-
-            elif term == "rcp":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                n = stack1.pop(0)
-                if n == 0:
-                    stack1.insert(0, math.inf)
-                else:
-                    stack1.insert(0, 1/n)
-
-            elif term == "div":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                if a == b:
-                    stack1.insert(0, 1)
-                elif a == 0:
-                    stack1.insert(0, math.inf * abs(b)/b)
-                else:
-                    stack1.insert(0, a/b)
-
-            elif term == "mod":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                if b == 0:
-                    stack1.insert(0, 0)
-                else:
-                    stack1.insert(0, a % b)
-
-            elif term == "abs":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = abs(stack1[0])
-
-            elif term == "sgn":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                n = stack1.pop(0)
-                if n == 0:
-                    stack1.insert(0, 0)
-                else:
-                    stack1.insert(0, abs(n)/n)
-
-            elif term == "pow":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, a ** b)
-
-            elif term == "sqrt":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = stack1[0] ** .5
-
-            elif term == "log":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, math.log(a, b))
-
-            elif term == "sin":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.sin(stack1[0])
-
-            elif term == "cos":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.cos(stack1[0])
-
-            elif term == "tan":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.tan(stack1[0])
-
-            elif term == "asin":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.asin(stack1[0])
-
-            elif term == "acos":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.acos(stack1[0])
-
-            elif term == "atan":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.atan(stack1[0])
-
-            elif term == "flr":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.floor(stack1[0])
-
-            elif term == "ceil":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.ceil(stack1[0])
-
-            elif term == "rnd":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = math.round(stack1[0])
-
-            # equality
-            elif term == "eq":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, float(a == b))
-
-            elif term == "neq":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, float(a != b))
-
-            elif term == "lt":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, float(a < b))
-
-            elif term == "gt":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, float(a > b))
-
-            elif term == "lte":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, float(a <= b))
-
-            elif term == "gte":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, float(a >= b))
-
-            elif term == "min":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, min(a, b))
-
-            elif term == "max":
-                if len(stack1) < 2:
-                    raise AbjadArgumentException(len(stack1), 2)
-                a = stack1.pop(0)
-                b = stack1.pop(0)
-                stack1.insert(0, max(a, b))
-
-            # stack
-            elif term == "dup":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1.insert(0, stack1[0])
-
-            elif term == "pop":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                stack1.pop(0)
-
-            elif term == "swp":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                if len(stack2) < 1:
-                    raise AbjadArgumentException(len(stack2), 1)
-                n1 = stack1.pop(0)
-                n2 = stack2.pop(0)
-                stack1.insert(0, n2)
-                stack1.insert(0, n1)
-
-            elif term == "lft":
-                if len(stack2) < 1:
-                    raise AbjadArgumentException(len(stack2), 1)
-                n2 = stack1.pop(0)
-                stack1.insert(0, n2)
-
-            elif term == "rgt":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                n1 = stack1.pop(0)
-                stack1.insert(0, n1)
-
-            # other
-            elif term == "asrt":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                elif stack1[0] != 1:
-                    raise AbjadAssertException(stack1[0])
-                else:
-                    stack1 = stack1[1::]
-
-            elif term == "dbg":
-                print((stack1, stack2))
-
-            elif term == "inp":
-                inputted = parse_complex(input())
-                if inputted is False:
-                    raise AbjadValueException(inputted)
-                else:
-                    stack1.insert(0, inputted)
-
-            elif term == "out":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                print(stack1.pop(0))
-
-            elif term == "cout":
-                if len(stack1) < 1:
-                    raise AbjadArgumentException(len(stack1), 1)
-                if stack1[0].imag != 0 or stack1[0].real < 0 or stack1[0].real % 1 != 0:
-                    raise AbjadValueException(stack1[0])
-                print(chr(round(stack1.pop(0).real)), end="")
-
-            elif term == "nop":
-                pass
-
-            elif term == "comm":
+            if term == "comm":
                 break
-
-            elif term in var:
-                if isinstance(var[term], float):
-                    stack1.insert(0, var[term])
-                elif isinstance(var[term], str):
-                    stack1 = abjad(var[term], stack1, var)[0]
-
             else:
-                raise AbjadTermException(term)
+                stack1, stack2, var = abjadInstr(term, stack1, stack2, var)
 
         if assign is not None:
             var[assign] = stack1[0]
