@@ -37,9 +37,8 @@ def parse_complex(num):
 def abjad(code: str, *, inp: list = None, var: dict = None):
 
     lines = [line.casefold().split() for line in code.splitlines()]
-    inp = [] if inp is None else inp
     var = {} if var is None else var
-    stack1 = inp
+    stack1 = [] if inp is None else inp
     stack2 = []
 
     for line in lines:
@@ -57,10 +56,7 @@ def abjad(code: str, *, inp: list = None, var: dict = None):
 
         elif line[0] == "import":
             with open(line[1] + ".abjad", "r") as code:
-                var |= abjad(code.read(), line[2:])[1]
-            continue
-
-        elif line[0] == "comm":
+                var |= abjad(code.read(), line[2:], var)[1]
             continue
 
         line = line[::-1]
@@ -359,6 +355,9 @@ def abjad(code: str, *, inp: list = None, var: dict = None):
 
             elif term == "nop":
                 pass
+
+            elif term == "comm":
+                break
 
             elif term in var:
                 if isinstance(var[term], float):
