@@ -67,7 +67,7 @@ Apparently, writing tacit code also makes your code more readable.
 - `rgt`: move a value from the first stack to the second
 
 ### Other functions
-- `asrt`: error if the top stack value is not 1.0
+- `asrt`: error if the top stack value is not (1.0+0.0j)
 - `dbg`: print both stacks. Not reccommended for released code
 - `inp`: take a number as user input
 - `out`: print the top stack value
