@@ -7,7 +7,7 @@ However, the main difference is the removal of planet notation. Instead, you get
 All functions in Abjad work on the primary "left" stack, except for builtin stack manipulation functions.
 
 ## The basics of [Tacit](https://en.wikipedia.org/wiki/Tacit_programming)
-Tacit programming is the practise of not naming your variables.
+Tacit programming is the practise of not naming your function arguments.
 There are 3 kinds of programming languages: languages that don't let you tacit, languages that let you tacit, and languages that force you to tacit.
 Abjad is mostly the third type.
 However, if stack manipulation is too annoying for you, the `asgn` function will let you store variables.

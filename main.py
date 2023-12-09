@@ -271,14 +271,14 @@ def abjadInstr(inst, st1, st2, var):
             raise AbjadArgumentException(len(st1), 2)
         a = st1.pop(0)
         b = st1.pop(0)
-        st1.insert(0, min(a, b))
+        st1.insert(0, complex(min(a.real, b.real), min(a.imag, b.imag)))
 
     elif inst == "max":
         if len(st1) < 2:
             raise AbjadArgumentException(len(st1), 2)
         a = st1.pop(0)
         b = st1.pop(0)
-        st1.insert(0, max(a, b))
+        st1.insert(0, complex(max(a.real, b.real), max(a.imag, b.imag)))
 
     # stack
     elif inst == "dup":
