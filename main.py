@@ -1,59 +1,65 @@
-import re
 import math
 import random
 import sys
-import functools
+
 
 class AbjadGenericException(Exception):
     pass
+
+
 class AbjadTermException(AbjadGenericException):
     pass
+
+
 class AbjadArgumentException(AbjadGenericException):
     pass
+
+
 class AbjadAssertException(AbjadGenericException):
     pass
+
+
 class AbjadValueException(AbjadGenericException):
     pass
 
+
 def concat(arr):
-    return functools.reduce(lambda x, y: x + " " + y, arr, "")
+    return " ".join(map(str, arr))
+
 
 def parse_complex(num):
-    if re.search("^(-?\d+(\.\d+)?)$", num):
-        return float(re.search("^(-?\d+(\.\d+)?)$", num).groups()[0]) + 0j
-    elif re.search("^(-?\d+(\.\d+)?)j$", num):
-        return float(re.search("^(-?\d+(\.\d+)?)j$", num).groups()[0]) * 1j
-    elif re.search("^(-?\d+(\.\d+)?)([+-]\d+(\.\d+)?)j$", num):
-        return float(re.search("^(-?\d+(\.\d+)?)([+-]\d+(\.\d+)?)j$", num).groups()[0]) + float(re.search("^(-?\d+(\.\d+)?)([+-]\d+(\.\d+)?)j$", num).groups()[2]) * 1j
-    else:
+    try:
+        return complex(num)
+    except ValueError:
         return False
 
-def abjad(code, inp=[], vars={}):
-    lines = re.split('\n|//|nl', code)
-    split = []
-    for ln in lines:
-        split += [ln.casefold().split()]
+
+def abjad(code: str, *, inp: list = None, var: dict = None):
+
+    lines = [line.casefold().split() for line in code.splitlines()]
+    inp = [] if inp is None else inp
+    var = {} if var is None else var
     stack1 = inp
     stack2 = []
-    variables = vars
-    for ln in split:
-        if len(ln) == 0:
+
+    for line in lines:
+        if len(line) == 0:
             continue
         assign = None
-        if ln[0] == "asgn":
-            assign = ln[1]
-            ln = ln[2:]
-        elif ln[0] == "def":
-            variables[ln[1]] = concat(ln[2::])
+        if line[0] == "asgn":
+            assign = line[1]
+            line = line[2:]
+        elif line[0] == "def":
+            var[line[1]] = concat(line[2::])
             continue
-        elif ln[0] == "import":
-            with open(ln[1] + ".abjad", 'r') as code:
-                variables |= abjad(code.read(), ln[2::])[1]
+        elif line[0] == "import":
+            with open(line[1] + ".abjad", "r") as code:
+                var |= abjad(code.read(), line[2:])[1]
             continue
-        elif ln[0] == "comm":
+        elif line[0] == "comm":
             continue
-        ln = ln[::-1]
-        for term in ln:
+        line = line[::-1]
+        for term in line:
             # literals
             if parse_complex(term) is not False:
                 stack1 = [parse_complex(term)] + stack1
@@ -82,194 +88,197 @@ def abjad(code, inp=[], vars={}):
             elif term == "add":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = top[1] + top[0]
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, a + b)
             elif term == "neg":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = -stack1[0]
             elif term == "sub":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = top[1] - top[0]
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, a - b)
             elif term == "mul":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = top[1] * top[0]
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, a * b)
             elif term == "rcp":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
-                if stack1[0] == 0:
-                    stack1[0] = math.inf
-                stack1[0] = 1/stack1[0]
+                n = stack1.pop(0)
+                if n == 0:
+                    stack1.insert(0, math.inf)
+                else:
+                    stack1.insert(0, 1/n)
             elif term == "div":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                if top[0] == top[1]:
-                    stack1[0] = 1
-                elif top[0] == 0:
-                    stack1[0] = math.inf * abs(top[1]) / top[1]
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                if a == b:
+                    stack1.insert(0, 1)
+                elif a == 0:
+                    stack1.insert(0, math.inf * abs(b)/b)
                 else:
-                    stack1[0] = top[1] / top[0]
+                    stack1.insert(0, a/b)
             elif term == "mod":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                if top[0] == 0:
-                    stack1[0] = 0
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                if b == 0:
+                    stack1.insert(0, 0)
                 else:
-                    stack1[0] = top[1] % top[0]
+                    stack1.insert(0, a % b)
             elif term == "abs":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = abs(stack1[0])
             elif term == "sgn":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
-                stack1[0] = abs(stack1[0]) / stack1[0]
+                n = stack1.pop(0)
+                if n == 0:
+                    stack1.insert(0, 0)
+                else:
+                    stack1.insert(0, abs(n)/n)
             elif term == "pow":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = top[1] ** top[0]
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, a ** b)
             elif term == "sqrt":
                 if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
-                top = stack1[0]
-                stack1[0] = top ** 0.5
+                stack1[0] = stack1[0] ** .5
             elif term == "log":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = math.log(top[1], top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, math.log(a, b))
             elif term == "sin":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.sin(stack1[0])
             elif term == "cos":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.cos(stack1[0])
             elif term == "tan":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.tan(stack1[0])
             elif term == "asin":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.asin(stack1[0])
             elif term == "acos":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.acos(stack1[0])
             elif term == "atan":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.atan(stack1[0])
             elif term == "flr":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.floor(stack1[0])
             elif term == "ceil":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.ceil(stack1[0])
             elif term == "rnd":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 stack1[0] = math.round(stack1[0])
             # equality
             elif term == "eq":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = float(top[1] == top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, float(a == b))
             elif term == "neq":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = float(top[1] != top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, float(a != b))
             elif term == "lt":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = float(top[1] < top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, float(a < b))
             elif term == "gt":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = float(top[1] > top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, float(a > b))
             elif term == "lte":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = float(top[1] <= top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, float(a <= b))
             elif term == "gte":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = float(top[1] >= top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, float(a >= b))
             elif term == "min":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = min(top[1], top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, min(a, b))
             elif term == "max":
                 if len(stack1) < 2:
                     raise AbjadArgumentException(len(stack1), 2)
-                top = stack1[:2:]
-                stack1 = stack1[1::]
-                stack1[0] = max(top[1], top[0])
+                a = stack1.pop(0)
+                b = stack1.pop(0)
+                stack1.insert(0, max(a, b))
             # stack
             elif term == "dup":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
-                stack1 = [stack1[0]] + stack1
+                stack1.insert(0, stack1[0])
             elif term == "pop":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
-                stack1 = stack1[1::]
+                stack1.pop(0)
             elif term == "swp":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
-                if len(stack2) == 0:
+                if len(stack2) < 1:
                     raise AbjadArgumentException(len(stack2), 1)
-                top1 = stack1[0]
-                top2 = stack2[0]
-                stack1 = stack1[1::]
-                stack2 = stack2[1::]
-                stack1 = [top2] + stack1
-                stack2 = [top1] + stack2
+                n1 = stack1.pop(0)
+                n2 = stack2.pop(0)
+                stack1.insert(0, n2)
+                stack1.insert(0, n1)
             elif term == "lft":
-                if len(stack2) == 0:
+                if len(stack2) < 1:
                     raise AbjadArgumentException(len(stack2), 1)
-                stack1 = [stack2[0]] + stack1
-                stack2 = stack2[1::]
+                n2 = stack1.pop(0)
+                stack1.insert(0, n2)
             elif term == "rgt":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
-                stack2 = [stack1[0]] + stack2
-                stack1 = stack1[1::]
+                n1 = stack1.pop(0)
+                stack1.insert(0, n1)
             # other
             elif term == "asrt":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 elif stack1[0] != 1:
                     raise AbjadAssertException(stack1[0])
@@ -282,40 +291,46 @@ def abjad(code, inp=[], vars={}):
                 if inputted is False:
                     raise AbjadValueException(inputted)
                 else:
-                    stack1 = [inputted] + stack1
+                    stack1.insert(0, inputted)
             elif term == "out":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
-                print(stack1[0])
-                stack1 = stack1[1::]
+                print(stack1.pop(0))
             elif term == "cout":
-                if len(stack1) == 0:
+                if len(stack1) < 1:
                     raise AbjadArgumentException(len(stack1), 1)
                 if stack1[0].imag != 0 or stack1[0].real < 0 or stack1[0].real % 1 != 0:
                     raise AbjadValueException(stack1[0])
-                print(chr(round(stack1[0].real)), end="")
-                stack1 = stack1[1::]
+                print(chr(round(stack1.pop(0).real)), end="")
             elif term == "nop":
                 pass
-            elif term in variables:
-                if isinstance(variables[term], float):
-                    stack1 = [variables[term]] + stack1
-                elif isinstance(variables[term], str):
-                    stack1 = abjad(variables[term], stack1, variables)[0]
+            elif term in var:
+                if isinstance(var[term], float):
+                    stack1.insert(0, var[term])
+                elif isinstance(var[term], str):
+                    stack1 = abjad(var[term], stack1, var)[0]
             else:
                 raise AbjadTermException(term)
         if assign is not None:
-            variables[assign] = stack1[0]
+            var[assign] = stack1[0]
             stack1 = stack1[1::]
 
-    return stack1, variables
+    return stack1, var
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        with open("main.abjad", 'r') as code:
-            abjad(code.read())
-    elif re.fullmatch(r"^\w+\.abjad", sys.argv[1]):
-        with open(sys.argv[1], 'r') as code:
-            abjad(code.read(), sys.argv[2:])
-    else:
-        abjad(concat(sys.argv[1::]))
+
+def main():
+    match sys.argv[1:]:
+        case []:
+            with open("main.abjad", "r") as code:
+                abjad(code.read())
+        case ["-e", expr]:
+            abjad(expr)
+        case [name, *exprs]:
+            with open(name, "r") as code:
+                abjad(code.read(), exprs)
+        case _:
+            pass
+
+
+if __name__ == "__main__":
+    main()
