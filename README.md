@@ -75,9 +75,9 @@ Apparently, writing tacit code also makes your code more readable.
 - `nop`: do nothing
 - `comm`: denote the rest of the line as a comment
 - `if`: execute the proceeding instruction if and only if the top stack value is (1.0+0.0j)
+- `asgn`: define a variable with a value
 
 ### Prefix functions
 Prefix functions must only come at the start of a line
-- `asgn`: define a variable with a value
 - `def`: define a function
 - `import`: import variables from another file

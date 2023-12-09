@@ -41,6 +41,12 @@ def abjadInstr(inst, st1, st2, var):
         if st1.pop(0) == 1:
             return abjadInstr(inst[1], st1, st2, var)
     
+    if inst[0] == "asgn":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        var[inst[1]] = st1.pop()
+        return abjadInstr(inst[1], st1, st2, var)
+    
     # literals
     elif parse_complex(inst) is not False:
         st1 = [parse_complex(inst)] + st1
@@ -361,11 +367,6 @@ def abjad(code: str, *, inp: list = None, var: dict = None):
         if len(line) == 0:
             continue
 
-        assign = None
-        if line[0] == "asgn":
-            assign = line[1]
-            line = line[2:]
-
         elif line[0] == "def":
             var[line[1]] = concat(line[2::])
             continue
@@ -378,6 +379,8 @@ def abjad(code: str, *, inp: list = None, var: dict = None):
         for ind, lex in enumerate(line):
             if lex == "if":
                 line = line[:ind:] + [("if", line[ind+1])] + line[ind+2::]
+            elif lex == "asgn":
+                line = line[:ind:] + [("asgn", line[ind+1])] + line[ind+2::]
 
         line = line[::-1]
         for term in line:
@@ -385,10 +388,6 @@ def abjad(code: str, *, inp: list = None, var: dict = None):
                 break
             else:
                 stack1, stack2, var = abjadInstr(term, stack1, stack2, var)
-
-        if assign is not None:
-            var[assign] = stack1[0]
-            stack1 = stack1[1::]
 
     return stack1, var
 
