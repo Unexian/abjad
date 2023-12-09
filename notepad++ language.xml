@@ -5,12 +5,12 @@
         </Settings>
         <KeywordLists>
             <Keywords name="Comments">03comm</Keywords>
-            <Keywords name="Keywords1">def asgn import asrt dbg inp out cout nop</Keywords>
+            <Keywords name="Keywords1">def asgn import asrt dbg inp out cout nop if</Keywords>
             <Keywords name="Keywords2">e j pi tau eta inf eps mu omg rand</Keywords>
             <Keywords name="Keywords3">add sub mul div mod pow log</Keywords>
-            <Keywords name="Keywords4">sin cos tan asin acos atan sqrt abs sgn rcp neg flr ceil rnd</Keywords>
-            <Keywords name="Keywords5">eq neq lt lte gt gte min max</Keywords>
-            <Keywords name="Keywords6">dup pop swp lft rgt </Keywords>
+            <Keywords name="Keywords4">sin cos tan asin acos atan sqrt abs sgn rcp neg flr ceil rnd conj</Keywords>
+            <Keywords name="Keywords5">eq neq dir min max</Keywords>
+            <Keywords name="Keywords6">dup pop swp lft rgt</Keywords>
         </KeywordLists>
         <Styles>
             <WordsStyle name="DEFAULT" fgColor="FFFFFF" bgColor="000000" colorStyle="1" fontStyle="0" nesting="0" />

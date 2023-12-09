@@ -28,17 +28,19 @@ Apparently, writing tacit code also makes your code more readable.
 ## Function library
 ### Mathematical functions
 - `add`: add the two top values together
-- `neg`: negate the top value
 - `sub`: take the top value from the second
 - `mul`: multiply the two top values together
-- `rcp`: take the reciprocal of the top value
 - `div`: divide the second value by the top
 - `mod`: take the second value mod the top
+- `pow`: take the second value raised to the first
+- `log`: take the logarithm with the base of the top value, of the second
+
+- `neg`: negate the top value
+- `rcp`: take the reciprocal of the top value
+- `conj`: take the complex conjugate of the top value
 - `abs`: take the absolute value of the top value
 - `sgn`: take the sign of the top value
-- `pow`: take the second value raised to the first
 - `sqrt`: find the square root of the top value
-- `log`: take the logarithm with the base of the top value, of the second
 
 - `sin`: find the sine of the top value
 - `cos`: find the cosine of the top value
@@ -54,10 +56,7 @@ Apparently, writing tacit code also makes your code more readable.
 ### Comparison functions
 - `eq`: push `(1.0+0.0j)` if the top two values on the stack are equal, and `(0.0+0.0j)` otherwise
 - `neq`: push `(0.0+0.0j)` if the top two values on the stack are equal, and `(1.0+0.0j)` otherwise
-- `lt`: push `(1.0+0.0j)` if the second value on the stack is less than the top, and `(0.0+0.0j)` otherwise
-- `gt`: push `(1.0+0.0j)` if the second value on the stack is greater than the top, and `(0.0+0.0j)` otherwise
-- `lte`: push `(1.0+0.0j)` if the second value on the stack is less than or equal to the top, and `(0.0+0.0j)` otherwise
-- `gte`: push `(1.0+0.0j)` if the second value on the stack is greater than or equal to the top, and `(0.0+0.0j)` otherwise
+- `dir`: get a normalized direction between two values
 - `min`: find the lowest of the top two values
 - `min`: find the greatest of the top two values
 

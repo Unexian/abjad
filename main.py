@@ -41,7 +41,7 @@ def abjadInstr(inst, st1, st2, var):
         if st1.pop(0) == 1:
             return abjadInstr(inst[1], st1, st2, var)
     
-    if inst[0] == "asgn":
+    elif inst[0] == "asgn":
         if len(st1) < 1:
             raise AbjadArgumentException(len(st1), 1)
         var[inst[1]] = st1.pop()
@@ -117,6 +117,12 @@ def abjadInstr(inst, st1, st2, var):
             st1.insert(0, math.inf)
         else:
             st1.insert(0, 1/n)
+
+    elif inst == "conj":
+        if len(st1) < 1:
+            raise AbjadArgumentException(len(st1), 1)
+        n = st1.pop(0)
+        st1.insert(0, n.real - 1j * n.imag)
 
     elif inst == "div":
         if len(st1) < 2:
@@ -232,34 +238,33 @@ def abjadInstr(inst, st1, st2, var):
         a = st1.pop(0)
         b = st1.pop(0)
         st1.insert(0, float(a != b))
-
-    elif inst == "lt":
-        if len(st1) < 2:
-            raise AbjadArgumentException(len(st1), 2)
+    
+    elif inst == "dir":
         a = st1.pop(0)
         b = st1.pop(0)
-        st1.insert(0, float(a < b))
-
-    elif inst == "gt":
-        if len(st1) < 2:
-            raise AbjadArgumentException(len(st1), 2)
-        a = st1.pop(0)
-        b = st1.pop(0)
-        st1.insert(0, float(a > b))
-
-    elif inst == "lte":
-        if len(st1) < 2:
-            raise AbjadArgumentException(len(st1), 2)
-        a = st1.pop(0)
-        b = st1.pop(0)
-        st1.insert(0, float(a <= b))
-
-    elif inst == "gte":
-        if len(st1) < 2:
-            raise AbjadArgumentException(len(st1), 2)
-        a = st1.pop(0)
-        b = st1.pop(0)
-        st1.insert(0, float(a >= b))
+        c = b - a
+        if c == 0:
+            st1.insert(0, 0+0j)
+        else:
+            d = math.atan2(c.imag, c.real) / math.pi
+            if d > 0.875:
+                st1.insert(0, -1+0j)
+            elif d > 0.625:
+                st1.insert(0, -1+1j)
+            elif d > 0.375:
+                st1.insert(0, 0+1j)
+            elif d > 0.125:
+                st1.insert(0, 1+1j)
+            elif d > -0.125:
+                st1.insert(0, 1+0j)
+            elif d > -0.375:
+                st1.insert(0, 1-1j)
+            elif d > -0.625:
+                st1.insert(0, 0-1j)
+            elif d > -0.875:
+                st1.insert(0, -1-1j)
+            else:
+                st1.insert(0, -1+0j)
 
     elif inst == "min":
         if len(st1) < 2:
