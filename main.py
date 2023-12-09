@@ -402,8 +402,8 @@ def main():
         case []:
             with open("main.abjad", "r") as code:
                 abjad(code.read())
-        case ["-e", expr]:
-            abjad(expr)
+        case ["-e", *exprs]:
+            abjad(concat(exprs))
         case [name, *exprs]:
             with open(name, "r") as code:
                 abjad(code.read(), inp=exprs)
