@@ -385,7 +385,7 @@ def main():
             abjad(expr)
         case [name, *exprs]:
             with open(name, "r") as code:
-                abjad(code.read(), exprs)
+                abjad(code.read(), inp=exprs)
         case _:
             pass
 
