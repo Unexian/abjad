@@ -48,6 +48,35 @@ def abjadInstr(inst, st1, st2, var):
         var[inst[1]] = st1.pop()
         return abjadInstr(inst[1], st1, st2, var)
     
+    elif inst[0] == "brkt":
+        oldVar = var
+        for line in inst[1]:
+            if len(line) == 0:
+                continue
+
+            elif line[0] == "def":
+                var[line[1]] = concat(line[2::])
+                continue
+
+            elif line[0] == "import":
+                with open(line[1] + ".abjad", "r") as code:
+                    var |= abjad(code.read(), inp=line[2:], var=var)[1]
+                continue
+            
+            for ind, lex in enumerate(line):
+                if lex == "if":
+                    line = line[:ind:] + [("if", line[ind+1])] + line[ind+2::]
+                elif lex == "asgn":
+                    line = line[:ind:] + [("asgn", line[ind+1])] + line[ind+2::]
+
+            line = line[::-1]
+            for term in line:
+                if term == "comm":
+                    break
+                else:
+                    st1, st2, var = abjadInstr(term, st1, st2, var)
+        var = oldVar
+    
     # literals
     elif parse_complex(inst) is not False:
         st1 = [parse_complex(inst)] + st1
@@ -361,26 +390,23 @@ def abjadInstr(inst, st1, st2, var):
 
 
 def abjadBrkt(code: str):
-    if re.search(r'\(.*\)'):
-        return [
-            *abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$').groups[0]),
-            ("brkt", abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$').groups[0])),
-            *abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$').groups[2]),
-        ]
-    
-    if re.search(r'\[.*\]'):
-        return [
-            *abjadBrkt(re.search(r'^(.*)\[(.*?)\](.*)$').groups[0]),
-            ("list", abjadBrkt(re.search(r'^(.*)\[(.*?)\](.*)$').groups[0])),
-            *abjadBrkt(re.search(r'^(.*)\[(.*?)\](.*)$').groups[2]),
-        ]
+    if re.search(r'\(.*\)', code, re.DOTALL):
+        return (
+            abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$', code, re.DOTALL).groups()[0]) +
+            [("brkt", abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$', code, re.DOTALL).groups()[1]))] +
+            abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$', code, re.DOTALL).groups()[2])
+        )
     
     else:
-        return [code.splitlines()]
+        spl = re.split(r'\n|\\|nl', code)
+        out = []
+        for i in spl:
+            out += [i.split()]
+        return out
 
 def abjad(code: str, *, inp: list = None, var: dict = None):
 
-    lines = [line.casefold().split() for line in code.splitlines()]
+    lines = abjadBrkt(code.casefold())
     var = {} if var is None else var
     stack1 = [] if inp is None else inp
     stack2 = []

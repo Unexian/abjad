@@ -4,7 +4,7 @@ By Nif
 ## The basics of Abjad
 The Abjad programming language is a tacit, stack-based language, quite similar to [Uiua](https://www.uiua.org).
 However, the main difference is the removal of planet notation. Instead, you get a second stack to store items not being used.
-All functions in Abjad work on the primary "left" stack, except for builtin stack manipulation functions.
+All functions in Abjad work on the primary "left" stack, except for built-in stack manipulation functions.
 
 ## The basics of [Tacit](https://en.wikipedia.org/wiki/Tacit_programming)
 Tacit programming is the practise of not naming your function arguments.
@@ -82,3 +82,6 @@ Apparently, writing tacit code also makes your code more readable.
 Prefix functions must only come at the start of a line
 - `def`: define a function
 - `import`: import variables from another file
+
+### Notes
+You can use brackets `()` to partition code into blocks. This can be used for extended `if`s, multiline `def`s, and other stuff
