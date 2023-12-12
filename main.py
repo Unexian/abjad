@@ -1,6 +1,7 @@
 import math
 import random
 import sys
+import re
 
 
 class AbjadGenericException(Exception):
@@ -359,7 +360,23 @@ def abjadInstr(inst, st1, st2, var):
     return (st1, st2, var)
 
 
-
+def abjadBrkt(code: str):
+    if re.search(r'\(.*\)'):
+        return [
+            *abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$').groups[0]),
+            ("brkt", abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$').groups[0])),
+            *abjadBrkt(re.search(r'^(.*)\((.*?)\)(.*)$').groups[2]),
+        ]
+    
+    if re.search(r'\[.*\]'):
+        return [
+            *abjadBrkt(re.search(r'^(.*)\[(.*?)\](.*)$').groups[0]),
+            ("list", abjadBrkt(re.search(r'^(.*)\[(.*?)\](.*)$').groups[0])),
+            *abjadBrkt(re.search(r'^(.*)\[(.*?)\](.*)$').groups[2]),
+        ]
+    
+    else:
+        return [code.splitlines()]
 
 def abjad(code: str, *, inp: list = None, var: dict = None):
 
